@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Order Fulfillment Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .font-mono-custom {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* REFINED GLASSMORPHISM */
+    
+    /* Light Mode Glass: Translucent white over pastel ambient background */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.58);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 
+        0 20px 45px -10px rgba(100, 116, 139, 0.16),
+        0 8px 16px -6px rgba(100, 116, 139, 0.08),
+        inset 0 1.5px 2px rgba(255, 255, 255, 1);
+    }
+    
+    /* Dark Mode Glass: Deep moody acrylic, subtle elegant glow without glare */
+    .dark .glass-panel {
+      background: rgba(10, 15, 28, 0.72);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 
+        0 30px 60px -15px rgba(0, 0, 0, 0.85),
+        0 10px 20px -8px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+
+    .glass-subcard {
+      background: rgba(255, 255, 255, 0.42);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 12px -2px rgba(100, 116, 139, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+    .dark .glass-subcard {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-input {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+    .dark .glass-input {
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .grid-pattern {
+      background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .dark .grid-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.97) translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .animate-enter {
+      animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes floatOrb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-20px, 15px) scale(1.05); }
+    }
+    .animate-orb {
+      animation: floatOrb 12s ease-in-out infinite;
+    }
+
+    .btn-shine {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-shine::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.22), transparent);
+      transform: rotate(30deg);
+      transition: all 0.65s ease;
+    }
+    .btn-shine:hover::after {
+      left: 130%;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/60 to-purple-50/50 dark:from-[#03060d] dark:via-[#050811] dark:to-[#020408] text-slate-800 dark:text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-500 relative selection:bg-indigo-500 selection:text-white overflow-x-hidden">
+
+  <!-- Background decorative dot grid -->
+  <div class="fixed inset-0 grid-pattern pointer-events-none -z-20"></div>
+
+  <!-- AMBIENT BACKGROUND GLOWS (Optimized: Colorful in light mode for glassmorphism, muted in dark mode to prevent glare) -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10 flex items-center justify-center">
+    
+    <!-- Light Mode: Soft colorful pastel orbs that show through frosted glass -->
+    <!-- Dark Mode: Deep, low-intensity navy/indigo ambient glow (NOT bright) -->
+    <div class="absolute -top-10 -right-10 sm:top-10 sm:right-1/4 w-[26rem] sm:w-[32rem] h-[26rem] sm:h-[32rem] 
+                bg-gradient-to-br from-indigo-300/60 via-purple-300/50 to-pink-300/40 
+                dark:from-indigo-950/30 dark:via-purple-950/20 dark:to-transparent 
+                rounded-full blur-[80px] dark:blur-[120px] animate-orb"></div>
+    
+    <div class="absolute -bottom-10 -left-10 sm:bottom-10 sm:left-1/4 w-[24rem] sm:w-[30rem] h-[24rem] sm:h-[30rem] 
+                bg-gradient-to-tr from-sky-300/60 via-blue-300/50 to-indigo-300/40 
+                dark:from-blue-950/30 dark:via-slate-900/20 dark:to-transparent 
+                rounded-full blur-[80px] dark:blur-[120px] animate-orb" style="animation-delay: -6s;"></div>
+  </div>
+
+  <!-- TOP-LEFT CORNER THEME TOGGLE (Frosted Glass Pill) -->
+  <div class="fixed top-4 left-4 sm:top-6 sm:left-6 z-50">
+    <button
+      id="theme-toggle"
+      onclick="toggleTheme()"
+      aria-label="Toggle theme"
+      class="glass-panel flex items-center gap-2.5 px-3.5 py-2 rounded-2xl text-slate-700 dark:text-slate-200 hover:border-indigo-400/80 active:scale-95 transition-all duration-200 group"
+    >
+      <span id="theme-icon" class="flex items-center justify-center transition-transform group-hover:rotate-12">
+        <i data-lucide="moon" class="w-4 h-4 text-indigo-500 dark:text-indigo-400"></i>
+      </span>
+      <span id="theme-text" class="text-xs font-bold select-none">
+        Dark
+      </span>
+    </button>
+  </div>
+
+  <main class="w-full max-w-lg relative z-10">
+    
+    <!-- STEP 1: Enter G2A Order ID Form (Glassmorphism Card) -->
+    <div id="step-input" class="glass-panel rounded-3xl p-7 sm:p-9 transition-all duration-300 animate-enter">
+      
+      <!-- Top Header Badge & Language Selector -->
+      <div class="flex items-start justify-between gap-3 mb-6">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-indigo-500/10 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/25 backdrop-blur-md mb-2.5 shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+            <span id="txt-step1-badge">Verification</span>
+          </div>
+          <h1 id="txt-step1-title" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Enter Your Order ID
+          </h1>
+        </div>
+
+        <!-- Language Selector (Step 1) -->
+        <div class="relative shrink-0">
+          <select
+            id="lang-select-step1"
+            onchange="changeLanguage(this.value)"
+            class="glass-subcard appearance-none pl-7 pr-7 py-1.5 text-xs font-bold rounded-xl text-slate-700 dark:text-slate-200 hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 shadow-sm cursor-pointer transition"
+          >
+            <option value="en" selected class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇺🇸 English</option>
+            <option value="pt" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇵🇹 Português</option>
+            <option value="id" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇮🇩 Indonesia</option>
+            <option value="ru" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇷🇺 Русский</option>
+            <option value="es" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇪🇸 Español</option>
+            <option value="de" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇩🇪 Deutsch</option>
+            <option value="fr" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇫🇷 Français</option>
+            <option value="pl" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇵🇱 Polski</option>
+            <option value="tr" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇹🇷 Türkçe</option>
+            <option value="zh" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇨🇳 简体中文</option>
+            <option value="ar" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇸🇦 العربية</option>
+          </select>
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+          </span>
+          <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+            <i data-lucide="chevron-down" class="w-3 h-3"></i>
+          </span>
+        </div>
+      </div>
+
+      <p id="txt-step1-desc" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed font-medium">
+        Please enter your 14-digit G2A Order ID (starting with 92000) to proceed with fulfillment.
+      </p>
+
+      <form id="order-form" onsubmit="handleOrderSubmit(event)" novalidate class="space-y-5">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label for="order-id-input" id="txt-step1-label" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+              G2A Order ID
+            </label>
+            <span id="char-counter" class="text-xs font-mono-custom text-slate-400 dark:text-slate-400 font-bold">0 / 14</span>
+          </div>
+          
+          <div class="relative group">
+            <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 dark:text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+              <i data-lucide="hash" class="w-4 h-4"></i>
+            </span>
+            <input
+              type="text"
+              id="order-id-input"
+              maxlength="14"
+              inputmode="numeric"
+              placeholder="92000xxxxxxxxx"
+              class="glass-input w-full pl-11 pr-11 py-3.5 text-base font-mono-custom font-bold rounded-2xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-white tracking-wider"
+              autocomplete="off"
+              autofocus
+            />
+            <span id="valid-check" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-emerald-500">
+              <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+            </span>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <p id="error-msg" class="hidden text-xs text-rose-600 dark:text-rose-300 mt-2.5 font-bold flex items-center gap-2 bg-rose-500/10 dark:bg-rose-950/40 border border-rose-500/30 p-3 rounded-xl backdrop-blur-md shadow-sm">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-500 dark:text-rose-400 shrink-0"></i>
+            <span id="error-msg-text">Please enter correct order id</span>
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          class="btn-shine w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 active:scale-[0.99] text-white font-extrabold text-sm sm:text-base shadow-xl shadow-indigo-600/30 dark:shadow-indigo-500/20 border border-indigo-400/30 transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span id="txt-step1-btn">Continue</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- STEP 2: Order ID Noted & Delivery Details (Glassmorphism Card) -->
+    <div id="step-details" class="hidden glass-panel rounded-3xl p-7 sm:p-9 transition-all duration-300">
+      
+      <!-- Top Success Status Banner -->
+      <div class="flex items-start justify-between gap-3 pb-5 border-b border-slate-200/60 dark:border-white/10">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30 shadow-inner backdrop-blur-md">
+            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="inline-flex items-center gap-1 text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="txt-badge-confirmed">Confirmed</span>
+            </div>
+            <h2 id="txt-step2-title" class="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Ok noted, it's your Order ID
+            </h2>
+          </div>
+        </div>
+
+        <!-- Right Side: LANGUAGE DROPDOWN DIRECTLY ABOVE CHANGE BUTTON -->
+        <div class="flex flex-col items-end gap-2 shrink-0">
+          
+          <!-- Dropdown Language Selection -->
+          <div class="relative">
+            <select
+              id="lang-select-step2"
+              onchange="changeLanguage(this.value)"
+              class="glass-subcard appearance-none pl-7 pr-7 py-1 text-xs font-bold rounded-xl text-slate-700 dark:text-slate-200 hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 shadow-sm cursor-pointer transition"
+            >
+              <option value="en" selected class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇺🇸 English</option>
+              <option value="pt" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇵🇹 Português</option>
+              <option value="id" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇮🇩 Indonesia</option>
+              <option value="ru" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇷🇺 Русский</option>
+              <option value="es" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇪🇸 Español</option>
+              <option value="de" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇩🇪 Deutsch</option>
+              <option value="fr" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇫🇷 Français</option>
+              <option value="pl" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇵🇱 Polski</option>
+              <option value="tr" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇹🇷 Türkçe</option>
+              <option value="zh" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇨🇳 简体中文</option>
+              <option value="ar" class="bg-white dark:bg-slate-900 text-slate-800 dark:text-white">🇸🇦 العربية</option>
+            </select>
+            <span class="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+            </span>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <i data-lucide="chevron-down" class="w-3 h-3"></i>
+            </span>
+          </div>
+
+          <!-- Change Button -->
+          <button
+            onclick="resetOrderForm()"
+            title="Change Order ID"
+            class="glass-subcard text-xs text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-bold py-1.5 px-3 rounded-xl transition flex items-center gap-1.5 shadow-sm active:scale-95"
+          >
+            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            <span id="txt-change-btn">Change</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Highlighted Order ID Badge (Frosted Receipt Container) -->
+      <div class="my-5 p-4 rounded-2xl glass-subcard flex items-center justify-between">
+        <div>
+          <span id="txt-recorded-label" class="text-[10px] uppercase tracking-wider font-extrabold text-slate-500 dark:text-slate-400">
+            Recorded Order ID
+          </span>
+          <div id="display-order-id" class="text-base sm:text-lg font-mono-custom font-extrabold text-indigo-600 dark:text-indigo-400 select-all tracking-wider">
+            -
+          </div>
+        </div>
+        <button
+          id="copy-btn"
+          onclick="copyOrderId()"
+          class="glass-subcard px-3.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 shadow-sm transition active:scale-95 flex items-center gap-1.5"
+        >
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+          <span id="copy-btn-text">Copy</span>
+        </button>
+      </div>
+
+      <!-- Core Instructions & Note -->
+      <div class="space-y-4">
+        
+        <!-- Message box with Provider Contact Buttons -->
+        <div class="p-5 rounded-2xl glass-subcard text-slate-700 dark:text-slate-300 text-sm leading-relaxed space-y-4">
+          <div>
+            <p id="txt-next-step-title" class="font-extrabold text-indigo-950 dark:text-indigo-300 mb-1 flex items-center gap-1.5">
+              <i data-lucide="message-square" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i> Next Step:
+            </p>
+            <p id="txt-provider-msg" class="leading-relaxed font-medium">
+              Dear customer, please message our provider with your Order ID. They will deliver you your deliverables.
+            </p>
+          </div>
+
+          <!-- Contact Buttons: Telegram & WhatsApp -->
+          <div class="pt-3 border-t border-slate-200/60 dark:border-white/10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              
+              <!-- Telegram Button (Blue) -->
+              <a
+                id="btn-telegram"
+                href="https://t.me/LuffyPrime7"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-shine flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#229ED9] to-[#1a8bc2] hover:from-[#1f93cb] hover:to-[#177ea0] active:scale-[0.98] text-white font-extrabold text-sm shadow-lg shadow-[#229ED9]/25 border border-white/20 transition-all duration-200 group"
+              >
+                <svg class="w-5 h-5 fill-current shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 496 512">
+                  <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm121.8 169.9l-40.7 191.8c-3 13.6-11.1 16.9-22.4 10.5l-62-45.7-29.9 28.8c-3.3 3.3-6.1 6.1-12.5 6.1l4.4-63.1 114.9-103.8c5-4.4-1.1-6.9-7.7-2.5l-142 89.4-61.2-19.1c-13.3-4.2-13.6-13.3 2.8-19.7l239.1-92.2c11.1-4 20.8 2.7 17.2 19.3z"/>
+                </svg>
+                <span>Telegram</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+              </a>
+
+              <!-- WhatsApp Button (Green) -->
+              <a
+                id="btn-whatsapp"
+                href="https://wa.me/919644657017"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-shine flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#25D366] to-[#1eb757] hover:from-[#22c15c] hover:to-[#1aa34e] active:scale-[0.98] text-white font-extrabold text-sm shadow-lg shadow-[#25D366]/25 border border-white/20 transition-all duration-200 group"
+              >
+                <svg class="w-5 h-5 fill-current shrink-0 transition-transform group-hover:scale-110" viewBox="0 0 448 512">
+                  <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                </svg>
+                <span>WhatsApp</span>
+                <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 opacity-75 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+              </a>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Working Hours & Delayed Notice (Frosted Glass Module) -->
+        <div class="p-5 rounded-2xl glass-subcard text-amber-950 dark:text-amber-200 text-sm leading-relaxed space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span id="txt-hours-title" class="font-extrabold flex items-center gap-1.5 text-amber-950 dark:text-amber-100">
+              <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i> Working Hours:
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono-custom bg-amber-500/15 text-amber-900 dark:text-amber-300 border border-amber-500/30 backdrop-blur-md">
+              8:30 AM – 4:30 PM CEST
+            </span>
+          </div>
+
+          <p id="txt-delay-notice" class="text-xs sm:text-sm text-amber-900/90 dark:text-amber-200/90 pt-2 border-t border-slate-200/60 dark:border-white/10 leading-relaxed font-medium">
+            If you are outside that window, reply and delivery can be late. Sorry in advance!
+          </p>
+
+          <!-- Live CEST Clock & Real-time Pulse Indicator -->
+          <div class="pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between text-xs">
+            <span id="txt-cest-title" class="text-amber-800 dark:text-amber-300/80 font-bold">Current CEST Time:</span>
+            <div class="flex items-center gap-2 font-mono-custom font-extrabold">
+              <span id="cest-clock" class="text-amber-950 dark:text-amber-200 tracking-wider">--:--:-- CEST</span>
+              <span id="cest-status" class="inline-block w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer note -->
+      <div class="mt-6 text-center">
+        <p id="txt-footer-hint" class="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+          Have questions? Keep your Order ID handy when reaching out.
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // ----------------------------------------------------------------
+    // MULTI-LANGUAGE TRANSLATIONS DICTIONARY
+    // ----------------------------------------------------------------
+    const translations = {
+      en: {
+        step1_badge: "Verification",
+        step1_title: "Enter Your Order ID",
+        step1_desc: "Please enter your 14-digit G2A Order ID (starting with 92000) to proceed with fulfillment.",
+        step1_label: "G2A Order ID",
+        step1_btn: "Continue",
+        badge_confirmed: "Confirmed",
+        step2_title: "Ok noted, it's your Order ID",
+        change_btn: "Change",
+        recorded_label: "Recorded Order ID",
+        copy_btn: "Copy",
+        copied_btn: "Copied!",
+        next_step_title: "Next Step:",
+        provider_msg: "Dear customer, please message our provider with your Order ID. They will deliver you your deliverables.",
+        hours_title: "Working Hours:",
+        delay_notice: "If you are outside that window, reply and delivery can be late. Sorry in advance!",
+        cest_title: "Current CEST Time:",
+        footer_hint: "Have questions? Keep your Order ID handy when reaching out.",
+        err_empty: "Please enter correct order id",
+        err_alpha: "Please enter correct order id (Only numbers allowed, no letters or symbols)",
+        err_prefix: "Please enter correct order id (Must start with 92000)",
+        err_len: "Please enter correct order id (Must be 14 digits, you entered {len})"
+      },
+      pt: {
+        step1_badge: "Verificação",
+        step1_title: "Insira seu ID do Pedido",
+        step1_desc: "Por favor, insira seu ID de pedido G2A de 14 dígitos (iniciando com 92000) para prosseguir.",
+        step1_label: "ID do Pedido G2A",
+        step1_btn: "Continuar",
+        badge_confirmed: "Confirmado",
+        step2_title: "Ok anotado, é o seu ID do pedido",
+        change_btn: "Alterar",
+        recorded_label: "ID DO PEDIDO REGISTRADO",
+        copy_btn: "Copiar",
+        copied_btn: "Copiado!",
+        next_step_title: "Próximo Passo:",
+        provider_msg: "Prezado cliente, por favor envie uma mensagem ao nosso provedor com seu ID do pedido. Eles entregarão suas entregas.",
+        hours_title: "Horário de Funcionamento:",
+        delay_notice: "Se você estiver fora desse horário, a resposta e o envio podem atrasar. Desculpe pelo transtorno antecipadamente!",
+        cest_title: "Horário Atual CEST:",
+        footer_hint: "Dúvidas? Mantenha o ID do seu pedido em mãos ao entrar em contato.",
+        err_empty: "Por favor, insira o ID de pedido correto",
+        err_alpha: "Por favor, insira o ID de pedido correto (Apenas números permitidos)",
+        err_prefix: "Por favor, insira o ID de pedido correto (Deve começar com 92000)",
+        err_len: "Por favor, insira o ID de pedido correto (Deve ter 14 dígitos, você inseriu {len})"
+      },
+      id: {
+        step1_badge: "Verifikasi",
+        step1_title: "Masukkan ID Pesanan Anda",
+        step1_desc: "Silakan masukkan 14 digit ID Pesanan G2A Anda (dimulai dengan 92000) untuk melanjutkan pengiriman.",
+        step1_label: "ID Pesanan G2A",
+        step1_btn: "Lanjutkan",
+        badge_confirmed: "Dikonfirmasi",
+        step2_title: "Oke dicatat, ini ID pesanan Anda",
+        change_btn: "Ubah",
+        recorded_label: "ID PESANAN TERCATAT",
+        copy_btn: "Salin",
+        copied_btn: "Tersalin!",
+        next_step_title: "Langkah Selanjutnya:",
+        provider_msg: "Pelanggan yang terhormat, silakan kirim pesan ke penyedia kami dengan ID Pesanan Anda. Mereka akan mengirimkan pesanan Anda.",
+        hours_title: "Jam Kerja:",
+        delay_notice: "Jika Anda menghubungi di luar jam tersebut, balasan dan pengiriman bisa terlambat. Mohon maaf sebelumnya!",
+        cest_title: "Waktu CEST Saat Ini:",
+        footer_hint: "Punya pertanyaan? Siapkan ID Pesanan Anda saat menghubungi.",
+        err_empty: "Silakan masukkan ID pesanan yang benar",
+        err_alpha: "Silakan masukkan ID pesanan yang benar (Hanya angka yang diperbolehkan)",
+        err_prefix: "Silakan masukkan ID pesanan yang benar (Harus dimulai dengan 92000)",
+        err_len: "Silakan masukkan ID pesanan yang benar (Harus 14 digit, Anda memasukkan {len})"
+      },
+      ru: {
+        step1_badge: "Верификация",
+        step1_title: "Введите номер заказа",
+        step1_desc: "Пожалуйста, введите 14-значный номер заказа G2A (начинается с 92000) для продолжения.",
+        step1_label: "Номер заказа G2A",
+        step1_btn: "Продолжить",
+        badge_confirmed: "Подтверждено",
+        step2_title: "Принято, это ваш номер заказа",
+        change_btn: "Изменить",
+        recorded_label: "НОМЕР ЗАКАЗА",
+        copy_btn: "Копировать",
+        copied_btn: "Скопировано!",
+        next_step_title: "Следующий шаг:",
+        provider_msg: "Уважаемый клиент, пожалуйста, отправьте нашему поставщику сообщение с вашим номером заказа. Они доставят ваш заказ.",
+        hours_title: "Рабочие часы:",
+        delay_notice: "Если вы обратитесь в нерабочее время, ответ и доставка могут задержаться. Заранее приносим извинения!",
+        cest_title: "Текущее время CEST:",
+        footer_hint: "Есть вопросы? Держите номер заказа под рукой при обращении.",
+        err_empty: "Пожалуйста, введите правильный номер заказа",
+        err_alpha: "Пожалуйста, введите правильный номер заказа (только цифры)",
+        err_prefix: "Пожалуйста, введите правильный номер заказа (должен начинаться с 92000)",
+        err_len: "Пожалуйста, введите правильный номер заказа (должно быть 14 цифр, вы ввели {len})"
+      },
+      es: {
+        step1_badge: "Verificación",
+        step1_title: "Ingrese su ID de Pedido",
+        step1_desc: "Ingrese su ID de pedido de G2A de 14 dígitos (que comience con 92000) para continuar.",
+        step1_label: "ID de Pedido G2A",
+        step1_btn: "Continuar",
+        badge_confirmed: "Confirmado",
+        step2_title: "Ok anotado, es su ID de pedido",
+        change_btn: "Cambiar",
+        recorded_label: "ID DE PEDIDO REGISTRADO",
+        copy_btn: "Copiar",
+        copied_btn: "¡Copiado!",
+        next_step_title: "Siguiente Paso:",
+        provider_msg: "Estimado cliente, envíe un mensaje a nuestro proveedor con su ID de pedido. Ellos le entregarán sus entregas.",
+        hours_title: "Horario de Trabajo:",
+        delay_notice: "Si se encuentra fuera de ese horario, la respuesta y la entrega pueden retrasarse. ¡Disculpas de antemano!",
+        cest_title: "Hora Actual CEST:",
+        footer_hint: "¿Tiene preguntas? Tenga a mano su ID de pedido al comunicarse.",
+        err_empty: "Por favor, introduzca el ID de pedido correcto",
+        err_alpha: "Por favor, introduzca el ID de pedido correcto (Solo números permitidos)",
+        err_prefix: "Por favor, introduzca el ID de pedido correcto (Debe comenzar con 92000)",
+        err_len: "Por favor, introduzca el ID de pedido correcto (Debe ser de 14 dígitos, ingresó {len})"
+      },
+      de: {
+        step1_badge: "Verifizierung",
+        step1_title: "Bestell-ID eingeben",
+        step1_desc: "Bitte geben Sie Ihre 14-stellige G2A-Bestell-ID (beginnend mit 92000) ein, um fortzufahren.",
+        step1_label: "G2A Bestell-ID",
+        step1_btn: "Weiter",
+        badge_confirmed: "Bestätigt",
+        step2_title: "Ok notiert, das ist Ihre Bestell-ID",
+        change_btn: "Ändern",
+        recorded_label: "ERFASSTE BESTELL-ID",
+        copy_btn: "Kopieren",
+        copied_btn: "Kopiert!",
+        next_step_title: "Nächster Schritt:",
+        provider_msg: "Lieber Kunde, bitte senden Sie unserem Anbieter eine Nachricht mit Ihrer Bestell-ID. Er wird Ihnen Ihre Lieferung zustellen.",
+        hours_title: "Arbeitszeiten:",
+        delay_notice: "Wenn Sie außerhalb dieses Zeitfensters liegen, können sich Antwort und Lieferung verzögern. Entschuldigung im Voraus!",
+        cest_title: "Aktuelle CEST-Zeit:",
+        footer_hint: "Haben Sie Fragen? Halten Sie Ihre Bestell-ID bei der Kontaktaufnahme bereit.",
+        err_empty: "Bitte geben Sie die korrekte Bestell-ID ein",
+        err_alpha: "Bitte geben Sie die korrekte Bestell-ID ein (Nur Zahlen erlaubt)",
+        err_prefix: "Bitte geben Sie die korrekte Bestell-ID ein (Muss mit 92000 beginnen)",
+        err_len: "Bitte geben Sie die korrekte Bestell-ID ein (Muss 14 Stellen haben, Sie haben {len} eingegeben)"
+      },
+      fr: {
+        step1_badge: "Vérification",
+        step1_title: "Entrez votre numéro de commande",
+        step1_desc: "Veuillez entrer votre numéro de commande G2A à 14 chiffres (commençant par 92000) pour continuer.",
+        step1_label: "Numéro de commande G2A",
+        step1_btn: "Continuer",
+        badge_confirmed: "Confirmé",
+        step2_title: "Bien noté, c'est votre numéro de commande",
+        change_btn: "Modifier",
+        recorded_label: "NUMÉRO DE COMMANDE ENREGISTRÉ",
+        copy_btn: "Copier",
+        copied_btn: "Copié !",
+        next_step_title: "Étape suivante :",
+        provider_msg: "Cher client, veuillez envoyer un message à notre fournisseur avec votre numéro de commande. Ils vous livreront vos livrables.",
+        hours_title: "Heures de travail :",
+        delay_notice: "Si vous êtes en dehors de cette plage horaire, la réponse et la livraison peuvent être retardées. Désolé d'avance !",
+        cest_title: "Heure CEST actuelle :",
+        footer_hint: "Des questions ? Gardez votre numéro de commande à portée de main.",
+        err_empty: "Veuillez entrer le numéro de commande correct",
+        err_alpha: "Veuillez entrer le numéro de commande correct (Chiffres uniquement)",
+        err_prefix: "Veuillez entrer le numéro de commande correct (Doit commencer par 92000)",
+        err_len: "Veuillez entrer le numéro de commande correct (Doit comporter 14 chiffres, vous avez entré {len})"
+      },
+      pl: {
+        step1_badge: "Weryfikacja",
+        step1_title: "Wpisz numer zamówienia",
+        step1_desc: "Wpisz 14-cyfrowy numer zamówienia G2A (zaczynający się od 92000), aby przejść do realizacji.",
+        step1_label: "Numer zamówienia G2A",
+        step1_btn: "Kontynuuj",
+        badge_confirmed: "Potwierdzono",
+        step2_title: "Zanotowano, to Twój numer zamówienia",
+        change_btn: "Zmień",
+        recorded_label: "ZAPISANY NUMER ZAMÓWIENIA",
+        copy_btn: "Kopiuj",
+        copied_btn: "Skopiowano!",
+        next_step_title: "Następny krok:",
+        provider_msg: "Drogi kliencie, wyślij wiadomość do naszego dostawcy z numerem zamówienia. Dostarczą Twoje zamówienie.",
+        hours_title: "Godziny pracy:",
+        delay_notice: "Jeśli kontaktujesz się poza tymi godzinami, odpowiedź i dostawa mogą się opóźnić. Z góry przepraszamy!",
+        cest_title: "Aktualny czas CEST:",
+        footer_hint: "Masz pytania? Miej pod ręką numer zamówienia podczas kontaktu.",
+        err_empty: "Wprowadź prawidłowy numer zamówienia",
+        err_alpha: "Wprowadź prawidłowy numer zamówienia (Tylko cyfry są dozwolone)",
+        err_prefix: "Wprowadź prawidłowy numer zamówienia (Musi zaczynać się od 92000)",
+        err_len: "Wprowadź prawidłowy numer zamówienia (Musi mieć 14 cyfr, wprowadzono {len})"
+      },
+      tr: {
+        step1_badge: "Doğrulama",
+        step1_title: "Sipariş Numaranızı Girin",
+        step1_desc: "Teslimat işlemine devam etmek için lütfen 14 haneli G2A sipariş numaranızı (92000 ile başlayan) girin.",
+        step1_label: "G2A Sipariş Numarası",
+        step1_btn: "Devam Et",
+        badge_confirmed: "Onaylandı",
+        step2_title: "Tamamdır, sipariş numaranız alındı",
+        change_btn: "Değiştir",
+        recorded_label: "KAYITLI SİPARİŞ NO",
+        copy_btn: "Kopyala",
+        copied_btn: "Kopyalandı!",
+        next_step_title: "Sonraki Adım:",
+        provider_msg: "Değerli müşterimiz, lütfen sipariş numaranızla birlikte sağlayıcımıza mesaj gönderin. Teslimatınızı ileteceklerdir.",
+        hours_title: "Çalışma Saatleri:",
+        delay_notice: "Bu saatlerin dışındaysanız, yanıt ve teslimat gecikebilir. Şimdiden özür dileriz!",
+        cest_title: "Güncel CEST Saati:",
+        footer_hint: "Sorularınız mı var? İletişime geçerken sipariş numaranızı hazır bulundurun.",
+        err_empty: "Lütfen doğru sipariş numarasını girin",
+        err_alpha: "Lütfen doğru sipariş numarasını girin (Yalnızca sayılar girilebilir)",
+        err_prefix: "Lütfen doğru sipariş numarasını girin (92000 ile başlamalıdır)",
+        err_len: "Lütfen doğru sipariş numarasını girin (14 basamaklı olmalı, {len} girdiniz)"
+      },
+      zh: {
+        step1_badge: "验证",
+        step1_title: "输入您的订单号",
+        step1_desc: "请输入您的14位G2A订单号（以92000开头）以继续进行交付。",
+        step1_label: "G2A 订单号",
+        step1_btn: "继续",
+        badge_confirmed: "已确认",
+        step2_title: "已记录，这是您的订单号",
+        change_btn: "更改",
+        recorded_label: "已记录的订单号",
+        copy_btn: "复制",
+        copied_btn: "已复制！",
+        next_step_title: "下一步：",
+        provider_msg: "尊敬的客户，请将您的订单号发送给我们的提供商，他们将为您进行交付。",
+        hours_title: "工作时间：",
+        delay_notice: "如果您在非工作时间联系，回复和交付可能会有所延迟。提前致歉！",
+        cest_title: "当前 CEST 时间：",
+        footer_hint: "有任何疑问？联系时请备好您的订单号。",
+        err_empty: "请输入正确的订单号",
+        err_alpha: "请输入正确的订单号（仅允许输入数字）",
+        err_prefix: "请输入正确的订单号（必须以92000开头）",
+        err_len: "请输入正确的订单号（必须为14位数字，您输入了{len}位）"
+      },
+      ar: {
+        step1_badge: "التحقق",
+        step1_title: "أدخل رقم طلبك",
+        step1_desc: "يرجى إدخال رقم طلب G2A المكون من 14 رقمًا (يبدأ بـ 92000) للمتابعة.",
+        step1_label: "رقم طلب G2A",
+        step1_btn: "متابعة",
+        badge_confirmed: "تم التأكيد",
+        step2_title: "تم التسجيل، هذا هو رقم طلبك",
+        change_btn: "تغيير",
+        recorded_label: "رقم الطلب المسجل",
+        copy_btn: "نسخ",
+        copied_btn: "تم النسخ!",
+        next_step_title: "الخطوة التالية:",
+        provider_msg: "عزيزي العميل، يرجى إرسال رسالة إلى المزود مع رقم طلبك وسيقوم بتسليم طلبك.",
+        hours_title: "ساعات العمل:",
+        delay_notice: "إذا كنت خارج هذه المواعيد، فقد يتأخر الرد والتسليم. نعتذر مسبقًا!",
+        cest_title: "توقيت CEST الحالي:",
+        footer_hint: "هل لديك أسئلة؟ احتفظ برقم طلبك في متناول يدك عند التواصل.",
+        err_empty: "يرجى إدخال رقم الطلب الصحيح",
+        err_alpha: "يرجى إدخال رقم الطلب الصحيح (أرقام فقط)",
+        err_prefix: "يرجى إدخال رقم الطلب الصحيح (يجب أن يبدأ بـ 92000)",
+        err_len: "يرجى إدخال رقم الطلب الصحيح (يجب أن يكون 14 رقمًا، أدخلت {len})"
+      }
+    };
+
+    let currentLang = localStorage.getItem('order_portal_lang') || 'en';
+
+    function changeLanguage(lang) {
+      if (!translations[lang]) lang = 'en';
+      currentLang = lang;
+      localStorage.setItem('order_portal_lang', lang);
+
+      // Sync dropdowns
+      const sel1 = document.getElementById('lang-select-step1');
+      const sel2 = document.getElementById('lang-select-step2');
+      if (sel1) sel1.value = lang;
+      if (sel2) sel2.value = lang;
+
+      const t = translations[lang];
+
+      // Update text in DOM
+      document.getElementById('txt-step1-badge').textContent = t.step1_badge;
+      document.getElementById('txt-step1-title').textContent = t.step1_title;
+      document.getElementById('txt-step1-desc').textContent = t.step1_desc;
+      document.getElementById('txt-step1-label').textContent = t.step1_label;
+      document.getElementById('txt-step1-btn').textContent = t.step1_btn;
+
+      document.getElementById('txt-badge-confirmed').textContent = t.badge_confirmed;
+      document.getElementById('txt-step2-title').textContent = t.step2_title;
+      document.getElementById('txt-change-btn').textContent = t.change_btn;
+      document.getElementById('txt-recorded-label').textContent = t.recorded_label;
+      document.getElementById('copy-btn-text').textContent = t.copy_btn;
+
+      document.getElementById('txt-next-step-title').innerHTML = `
+        <i data-lucide="message-square" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i> ${t.next_step_title}
+      `;
+      document.getElementById('txt-provider-msg').textContent = t.provider_msg;
+
+      document.getElementById('txt-hours-title').innerHTML = `
+        <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i> ${t.hours_title}
+      `;
+      document.getElementById('txt-delay-notice').textContent = t.delay_notice;
+      document.getElementById('txt-cest-title').textContent = t.cest_title;
+      document.getElementById('txt-footer-hint').textContent = t.footer_hint;
+
+      lucide.createIcons();
+    }
+
+    // Apply language on load
+    changeLanguage(currentLang);
+
+    // ----------------------------------------------------------------
+    // THEME MANAGEMENT (Default: Dark)
+    // ----------------------------------------------------------------
+    const savedTheme = localStorage.getItem('order_portal_theme') || 'dark';
+
+    function applyTheme(theme) {
+      const html = document.documentElement;
+      const themeText = document.getElementById('theme-text');
+      const themeIcon = document.getElementById('theme-icon');
+
+      if (theme === 'dark') {
+        html.classList.add('dark');
+        themeText.textContent = 'Dark';
+        themeIcon.innerHTML = '<i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>';
+      } else {
+        html.classList.remove('dark');
+        themeText.textContent = 'Light';
+        themeIcon.innerHTML = '<i data-lucide="sun" class="w-4 h-4 text-amber-500"></i>';
+      }
+
+      localStorage.setItem('order_portal_theme', theme);
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      applyTheme(isDark ? 'light' : 'dark');
+    }
+
+    // Apply initial theme on load
+    applyTheme(savedTheme);
+
+    // ----------------------------------------------------------------
+    // ORDER ID VALIDATION & SUBMISSION
+    // ----------------------------------------------------------------
+    let currentOrderId = '';
+
+    const orderInput = document.getElementById('order-id-input');
+    const charCounter = document.getElementById('char-counter');
+    const validCheck = document.getElementById('valid-check');
+    const errorMsg = document.getElementById('error-msg');
+    const errorMsgText = document.getElementById('error-msg-text');
+
+    // Real-time character counter and input feedback
+    orderInput.addEventListener('input', () => {
+      const val = orderInput.value.trim();
+      charCounter.textContent = `${val.length} / 14`;
+      
+      // Real-time check icon when valid
+      if (/^92000\d{9}$/.test(val)) {
+        validCheck.classList.remove('hidden');
+        orderInput.classList.add('border-emerald-500', 'focus:border-emerald-500');
+      } else {
+        validCheck.classList.add('hidden');
+        orderInput.classList.remove('border-emerald-500', 'focus:border-emerald-500');
+      }
+      clearError();
+    });
+
+    function showError(message) {
+      errorMsgText.textContent = message;
+      errorMsg.classList.remove('hidden');
+      orderInput.classList.add('border-rose-500', 'ring-4', 'ring-rose-500/20');
+      orderInput.focus();
+    }
+
+    function clearError() {
+      errorMsg.classList.add('hidden');
+      orderInput.classList.remove('border-rose-500', 'ring-4', 'ring-rose-500/20');
+    }
+
+    function handleOrderSubmit(e) {
+      e.preventDefault();
+      clearError();
+
+      const t = translations[currentLang] || translations.en;
+      const rawVal = orderInput.value.trim();
+
+      // Check 1: Empty input
+      if (!rawVal) {
+        showError(t.err_empty);
+        return;
+      }
+
+      // Check 2: Non-numeric characters (alphabets, symbols, spaces)
+      if (/[^\d]/.test(rawVal)) {
+        showError(t.err_alpha);
+        return;
+      }
+
+      // Check 3: Must start with 92000
+      if (!rawVal.startsWith('92000')) {
+        showError(t.err_prefix);
+        return;
+      }
+
+      // Check 4: Must be exactly 14 digits
+      if (rawVal.length !== 14) {
+        showError(t.err_len.replace('{len}', rawVal.length));
+        return;
+      }
+
+      // Exact match check
+      const g2aRegex = /^92000\d{9}$/;
+      if (!g2aRegex.test(rawVal)) {
+        showError(t.err_empty);
+        return;
+      }
+
+      // Valid Order ID
+      currentOrderId = rawVal;
+      document.getElementById('display-order-id').innerText = currentOrderId;
+
+      // Dynamically update Telegram Link with actual Order ID
+      const tgMessage = `Hii Bro, my order id is #${currentOrderId}  \nPlease can you tell me estimated time `;
+      const tgUrl = `https://t.me/LuffyPrime7?text=${encodeURIComponent(tgMessage)}`;
+      const tgBtn = document.getElementById('btn-telegram');
+      if (tgBtn) {
+        tgBtn.href = tgUrl;
+      }
+
+      // Dynamically update WhatsApp Link with actual Order ID (+91 9644657017)
+      const waMessage = `Hii Bro, my order id is #${currentOrderId}  \nPlease can you tell me estimated time `;
+      const waUrl = `https://wa.me/919644657017?text=${encodeURIComponent(waMessage)}`;
+      const waBtn = document.getElementById('btn-whatsapp');
+      if (waBtn) {
+        waBtn.href = waUrl;
+      }
+
+      // Transition views
+      const step1 = document.getElementById('step-input');
+      const step2 = document.getElementById('step-details');
+
+      step1.classList.add('hidden');
+      step2.classList.remove('hidden');
+      step2.classList.add('animate-enter');
+
+      lucide.createIcons();
+    }
+
+    function resetOrderForm() {
+      clearError();
+      const step1 = document.getElementById('step-input');
+      const step2 = document.getElementById('step-details');
+
+      step2.classList.add('hidden');
+      step2.classList.remove('animate-enter');
+
+      step1.classList.remove('hidden');
+      orderInput.focus();
+      orderInput.select();
+    }
+
+    function copyOrderId() {
+      if (!currentOrderId) return;
+      const t = translations[currentLang] || translations.en;
+      navigator.clipboard.writeText(currentOrderId).then(() => {
+        const btnText = document.getElementById('copy-btn-text');
+        btnText.innerText = t.copied_btn;
+        setTimeout(() => {
+          btnText.innerText = t.copy_btn;
+        }, 2000);
+      });
+    }
+
+    // ----------------------------------------------------------------
+    // Live CEST Clock and Status Check (8:30 AM to 4:30 PM CEST)
+    // ----------------------------------------------------------------
+    function updateCestTime() {
+      try {
+        const now = new Date();
+        // CEST is strictly UTC+2 (Central European Summer Time)
+        const cestTime = new Date(now.getTime() + (2 * 60 * 60 * 1000));
+
+        const hour = cestTime.getUTCHours();
+        const minute = cestTime.getUTCMinutes();
+        const second = cestTime.getUTCSeconds();
+
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const displayHour12 = (hour % 12) || 12;
+        const pad = (n) => String(n).padStart(2, '0');
+
+        // Formatted to match standard CEST (UTC+2) with 12-hour AM/PM
+        const timeStr = `${pad(displayHour12)}:${pad(minute)}:${pad(second)} ${period} CEST`;
+
+        const clockEl = document.getElementById('cest-clock');
+        const statusEl = document.getElementById('cest-status');
+
+        if (clockEl) clockEl.innerText = timeStr;
+
+        // Working hours: 8:30 AM (8.5) to 4:30 PM (16.5) CEST
+        const timeDec = hour + (minute / 60);
+        const isOpen = timeDec >= 8.5 && timeDec <= 16.5;
+
+        if (statusEl) {
+          if (isOpen) {
+            statusEl.className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse';
+            statusEl.title = 'Provider is currently active (Working Hours)';
+          } else {
+            statusEl.className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.6)]';
+            statusEl.title = 'Provider is currently outside working hours';
+          }
+        }
+      } catch (err) {
+        console.error('Timezone error', err);
+      }
+    }
+
+    setInterval(updateCestTime, 1000);
+    updateCestTime();
+  </script>
+</body>
+</html>
